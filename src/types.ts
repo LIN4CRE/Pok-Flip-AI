@@ -101,11 +101,16 @@ export interface CardMarketAnalytics {
   change24h: number;
   change7d: number;
   change30d: number;
+  change90d: number;
+  change1y: number;
   volume24h: number;
   liquidityScore: 'Ultra High' | 'High' | 'Moderate' | 'Low';
   sentiment: 'Bullish' | 'Neutral' | 'Bearish';
   marketCap: number;
-  historicalPrices: HistoricalPricePoint[];
+  historicalPrices: HistoricalPricePoint[]; // default 6M
+  historicalPrices30d?: HistoricalPricePoint[];
+  historicalPrices90d?: HistoricalPricePoint[];
+  historicalPrices1y?: HistoricalPricePoint[];
 }
 
 export interface SmartAlert {

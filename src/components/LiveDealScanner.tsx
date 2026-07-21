@@ -15,6 +15,7 @@ import {
   RefreshCw,
   Sparkles,
   ShoppingBag,
+  Store,
   ArrowUpRight,
   Info
 } from 'lucide-react';
