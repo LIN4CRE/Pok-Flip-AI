@@ -1,0 +1,6 @@
+{
+  "name": "PokéFlip AI – Market Intelligence & Card Flipping Platform",
+  "description": "Mobile-first Pokémon card flipping platform with real-time deal scanner, AI valuation engine, historical pricing analytics, inventory management, and shipping fulfillment.",
+  "requestFramePermissions": ["camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
