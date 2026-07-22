@@ -237,7 +237,80 @@ export const MarketAnalytics: React.FC = () => {
     });
   }, [analyticsList, selectedComparisonIds, timeframe, isNormalized, primaryCard]);
 
+  // Selected heatmap tile state
+  const [selectedHeatmapIndex, setSelectedHeatmapIndex] = useState<number | null>(null);
+
+  // Market Volatility Heatmap calculation based on historical price deltas and sales volume
+  const volatilityHeatmapData = useMemo(() => {
+    if (!activeDatasetGbp || activeDatasetGbp.length === 0) return [];
+
+    const maxVolume = Math.max(...activeDatasetGbp.map(d => d.salesVolume || 1), 1);
+
+    return activeDatasetGbp.map((pt, idx) => {
+      const prevPrice = idx > 0 ? activeDatasetGbp[idx - 1].psa10Gbp : pt.psa10Gbp;
+      const priceDeltaGbp = pt.psa10Gbp - prevPrice;
+      const pctChange = prevPrice > 0 ? ((priceDeltaGbp / prevPrice) * 100) : 0;
+      const absPctChange = Math.abs(pctChange);
+      const volumeRatio = pt.salesVolume / maxVolume;
+
+      // Volatility Index Score (0 - 100)
+      const volatilityScore = Math.min(100, Math.round(absPctChange * 9 + volumeRatio * 40));
+
+      let level: 'spike' | 'rally' | 'dip' | 'active' | 'stable' = 'stable';
+      let label = 'Stable Baseline';
+      let badgeColor = 'bg-slate-800 text-slate-400 border-slate-700';
+      let tileColor = 'bg-slate-800/80 border-slate-700 hover:border-slate-500';
+
+      if (pctChange >= 4.5 || volatilityScore >= 55) {
+        level = 'spike';
+        label = '🔥 High Price Spike';
+        badgeColor = 'bg-rose-500/20 text-rose-300 border-rose-500/40';
+        tileColor = 'bg-gradient-to-t from-rose-950 to-rose-600/90 border-rose-400/80 shadow-lg shadow-rose-950/50';
+      } else if (pctChange >= 2.0 || (volumeRatio > 0.65 && pctChange > 0)) {
+        level = 'rally';
+        label = '⚡ Volume Rally';
+        badgeColor = 'bg-amber-500/20 text-amber-300 border-amber-500/40';
+        tileColor = 'bg-gradient-to-t from-amber-950 to-amber-500/80 border-amber-400/80 shadow-md';
+      } else if (pctChange <= -2.5) {
+        level = 'dip';
+        label = '📉 Price Compression / Dip';
+        badgeColor = 'bg-purple-500/20 text-purple-300 border-purple-500/40';
+        tileColor = 'bg-gradient-to-t from-purple-950 to-purple-600/80 border-purple-400/80 shadow-md';
+      } else if (volatilityScore >= 20 || volumeRatio > 0.35) {
+        level = 'active';
+        label = '📈 Active Trading';
+        badgeColor = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40';
+        tileColor = 'bg-gradient-to-t from-emerald-950 to-emerald-600/70 border-emerald-500/60';
+      }
+
+      return {
+        date: pt.date,
+        priceGbp: pt.psa10Gbp,
+        priceDeltaGbp: Number(priceDeltaGbp.toFixed(2)),
+        pctChange: Number(pctChange.toFixed(1)),
+        salesVolume: pt.salesVolume,
+        volatilityScore,
+        level,
+        label,
+        badgeColor,
+        tileColor
+      };
+    });
+  }, [activeDatasetGbp]);
+
+  const heatmapHighlights = useMemo(() => {
+    if (!volatilityHeatmapData || volatilityHeatmapData.length === 0) {
+      return { peakSpike: null, peakVolume: null, avgScore: 0 };
+    }
+    const peakSpike = [...volatilityHeatmapData].sort((a, b) => b.pctChange - a.pctChange)[0];
+    const peakVolume = [...volatilityHeatmapData].sort((a, b) => b.salesVolume - a.salesVolume)[0];
+    const avgScore = Math.round(volatilityHeatmapData.reduce((acc, curr) => acc + curr.volatilityScore, 0) / volatilityHeatmapData.length);
+
+    return { peakSpike, peakVolume, avgScore };
+  }, [volatilityHeatmapData]);
+
   // Toggle card comparison logic (max 3)
+
   const toggleComparisonCard = (cardId: string) => {
     if (selectedComparisonIds.includes(cardId)) {
       if (selectedComparisonIds.length === 1) return; // Keep at least 1
@@ -268,34 +341,92 @@ export const MarketAnalytics: React.FC = () => {
     if (active && payload && payload.length) {
       const isProjPoint = payload.some((p: any) => p.payload?.isProjection);
       return (
-        <div className="bg-slate-950 border border-slate-800 rounded-xl p-3shadow-2xl text-xs space-y-2 min-w-[210px] shadow-2xl">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-1.5">
-            <span className="font-bold text-slate-300 flex items-center">
+        <div className="bg-slate-950/95 border border-slate-800 rounded-xl p-3.5 shadow-2xl text-xs space-y-2.5 min-w-[220px] backdrop-blur-md">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span className="font-bold text-slate-200 flex items-center">
+              <Calendar className="w-3.5 h-3.5 mr-1 text-amber-400" />
               {label}
               {isProjPoint && (
                 <span className="ml-1.5 px-1.5 py-0.5 text-[9px] bg-cyan-500/20 text-cyan-300 rounded font-semibold border border-cyan-500/30">
-                  AI Projection
+                  AI Model
                 </span>
               )}
             </span>
-            <span className="text-[10px] text-amber-400 font-semibold px-1.5 py-0.5 bg-amber-500/10 rounded">
+            <span className="text-[10px] text-amber-400 font-semibold px-2 py-0.5 bg-amber-500/10 rounded border border-amber-500/20">
               {primaryCard.cardName.split(' ')[0]}
             </span>
           </div>
-          <div className="space-y-1 pt-0.5">
+          <div className="space-y-1.5">
             {payload.map((entry: any, index: number) => {
               if (entry.value === null || entry.value === undefined) return null;
               return (
-                <div key={`item-${index}`} className="flex items-center justify-between">
+                <div key={`primary-item-${index}`} className="flex items-center justify-between p-1 rounded bg-slate-900/60 border border-slate-800/60">
                   <span className="flex items-center space-x-1.5" style={{ color: entry.color }}>
-                    <span className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                    <span className="text-slate-400">{entry.name}:</span>
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                    <span className="text-slate-300 font-medium">{entry.name}:</span>
                   </span>
                   <span className="font-bold text-white">
                     {entry.dataKey === 'salesVolume' 
-                      ? `${entry.value} sales` 
+                      ? `${entry.value} units` 
                       : `£${entry.value?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
                   </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Custom Interactive Tooltip for Multi-Card Comparison Chart with exact GBP £ prices
+  const CustomMultiComparisonTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-slate-950/95 border border-slate-800 rounded-xl p-3.5 text-xs space-y-2.5 min-w-[250px] shadow-2xl backdrop-blur-md">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <span className="font-bold text-slate-200 flex items-center">
+              <Calendar className="w-3.5 h-3.5 mr-1 text-amber-400" />
+              {label}
+            </span>
+            <span className="text-[10px] text-amber-400 font-semibold uppercase bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20">
+              {timeframe} Multi-Card
+            </span>
+          </div>
+          <div className="space-y-1.5">
+            {payload.map((entry: any, index: number) => {
+              const cardName = entry.name;
+              const cardObj = analyticsList.find(c => c.cardName === cardName);
+              
+              // Lookup exact price in GBP (£) for this date point
+              const cardDataset = timeframe === '30D' ? cardObj?.historicalPrices30d || cardObj?.historicalPrices
+                                : timeframe === '90D' ? cardObj?.historicalPrices90d || cardObj?.historicalPrices
+                                : timeframe === '1Y'  ? cardObj?.historicalPrices1y || cardObj?.historicalPrices
+                                : cardObj?.historicalPrices;
+              
+              const matchPoint = cardDataset?.find((p: any) => p.date === label) || cardDataset?.[0];
+              const priceGbp = matchPoint ? (matchPoint.psa10Price * USD_TO_GBP) : 0;
+
+              return (
+                <div key={`multi-tooltip-${index}`} className="p-2 rounded-lg bg-slate-900/80 border border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
+                    <div>
+                      <span className="font-bold text-white block text-xs">{cardName}</span>
+                      <span className="text-[10px] text-slate-400">{cardObj?.setName || 'Pokemon Singles'}</span>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-bold text-amber-300 block text-xs">
+                      £{priceGbp.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                    </span>
+                    {isNormalized && (
+                      <span className={`text-[10px] font-semibold block ${entry.value >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {entry.value >= 0 ? `+${entry.value}%` : `${entry.value}%`} ROI
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -799,6 +930,169 @@ export const MarketAnalytics: React.FC = () => {
         </div>
       </div>
 
+      {/* Market Volatility Heatmap Visualization Component */}
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
+          <div>
+            <div className="flex items-center space-x-2 text-rose-400 font-semibold text-xs uppercase tracking-wider">
+              <Flame className="w-4 h-4 text-rose-400" />
+              <span>Trading Activity & Price Spikes Engine</span>
+            </div>
+            <h3 className="text-lg font-bold text-white mt-0.5">
+              Market Volatility Heatmap ({timeframe})
+            </h3>
+            <p className="text-xs text-slate-400 mt-0.5">
+              Highlights trading activity volume, sharp price movements, and sudden market rallies across the {timeframe} timeframe in British Pounds (£). Click or hover over any tile to inspect date metrics.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center space-x-3 text-[11px] bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-800">
+              <span className="text-slate-400 font-medium">Intensity Legend:</span>
+              <span className="flex items-center space-x-1">
+                <span className="w-2.5 h-2.5 rounded bg-rose-500" />
+                <span className="text-rose-300 font-semibold">Spike</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <span className="w-2.5 h-2.5 rounded bg-amber-500" />
+                <span className="text-amber-300 font-semibold">Rally</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <span className="w-2.5 h-2.5 rounded bg-emerald-500" />
+                <span className="text-emerald-300 font-semibold">Active</span>
+              </span>
+              <span className="flex items-center space-x-1">
+                <span className="w-2.5 h-2.5 rounded bg-purple-500" />
+                <span className="text-purple-300 font-semibold">Dip</span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Heatmap Highlights KPI Row */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div>
+              <span className="text-[10px] text-slate-400 block uppercase font-medium">Peak Single Spike Event</span>
+              <span className="text-sm font-bold text-rose-400 mt-0.5 block">
+                {heatmapHighlights.peakSpike ? `+${heatmapHighlights.peakSpike.pctChange}% (£${heatmapHighlights.peakSpike.priceDeltaGbp > 0 ? `+${heatmapHighlights.peakSpike.priceDeltaGbp}` : heatmapHighlights.peakSpike.priceDeltaGbp})` : 'N/A'}
+              </span>
+              <span className="text-[10px] text-slate-500">
+                {heatmapHighlights.peakSpike ? `Date: ${heatmapHighlights.peakSpike.date}` : ''}
+              </span>
+            </div>
+            <div className="p-2 bg-rose-500/10 rounded-lg text-rose-400 border border-rose-500/20">
+              <Zap className="w-4 h-4" />
+            </div>
+          </div>
+
+          <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div>
+              <span className="text-[10px] text-slate-400 block uppercase font-medium">Highest Volume Cluster</span>
+              <span className="text-sm font-bold text-amber-400 mt-0.5 block">
+                {heatmapHighlights.peakVolume ? `${heatmapHighlights.peakVolume.salesVolume} units sold` : 'N/A'}
+              </span>
+              <span className="text-[10px] text-slate-500">
+                {heatmapHighlights.peakVolume ? `Date: ${heatmapHighlights.peakVolume.date} (£${heatmapHighlights.peakVolume.priceGbp})` : ''}
+              </span>
+            </div>
+            <div className="p-2 bg-amber-500/10 rounded-lg text-amber-400 border border-amber-500/20">
+              <BarChart2 className="w-4 h-4" />
+            </div>
+          </div>
+
+          <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between">
+            <div>
+              <span className="text-[10px] text-slate-400 block uppercase font-medium">Volatility Index Avg</span>
+              <span className="text-sm font-bold text-indigo-400 mt-0.5 block">
+                {heatmapHighlights.avgScore} / 100 ({heatmapHighlights.avgScore > 40 ? 'Moderate High' : 'Stable'})
+              </span>
+              <span className="text-[10px] text-slate-500">Period Avg Liquidity Velocity</span>
+            </div>
+            <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400 border border-indigo-500/20">
+              <Activity className="w-4 h-4" />
+            </div>
+          </div>
+        </div>
+
+        {/* Heatmap Grid Visual Ribbon */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between text-xs text-slate-400">
+            <span>Timeframe Timeline Checkpoints ({volatilityHeatmapData.length} data points)</span>
+            <span className="text-[11px] text-amber-400 font-medium">Hover or click tiles for price breakdown</span>
+          </div>
+
+          <div className="grid grid-cols-6 sm:grid-cols-12 md:grid-cols-15 lg:grid-cols-20 gap-1.5 p-3 bg-slate-950 rounded-xl border border-slate-800 overflow-x-auto">
+            {volatilityHeatmapData.map((tile, idx) => {
+              const isSelected = selectedHeatmapIndex === idx;
+              return (
+                <button
+                  key={`tile-${idx}`}
+                  onClick={() => setSelectedHeatmapIndex(isSelected ? null : idx)}
+                  onMouseEnter={() => setSelectedHeatmapIndex(idx)}
+                  className={`h-12 rounded-lg p-1 text-left transition-all relative group flex flex-col justify-between border ${tile.tileColor} ${
+                    isSelected ? 'ring-2 ring-amber-400 scale-105 z-10' : ''
+                  }`}
+                >
+                  <span className="text-[9px] font-semibold text-slate-200 truncate leading-none block">
+                    {tile.date.split(' ')[0]}
+                  </span>
+                  <div className="flex items-center justify-between mt-auto">
+                    <span className={`text-[9px] font-bold ${tile.pctChange >= 0 ? 'text-white' : 'text-purple-200'}`}>
+                      {tile.pctChange >= 0 ? `+${tile.pctChange}%` : `${tile.pctChange}%`}
+                    </span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Selected Heatmap Tile Detail Card */}
+        {selectedHeatmapIndex !== null && volatilityHeatmapData[selectedHeatmapIndex] && (
+          <div className="p-4 bg-slate-950 rounded-xl border border-amber-500/40 shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 animate-in fade-in duration-200">
+            <div className="space-y-1">
+              <div className="flex items-center space-x-2">
+                <span className="font-bold text-white text-sm">
+                  Date: {volatilityHeatmapData[selectedHeatmapIndex].date}
+                </span>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded border ${volatilityHeatmapData[selectedHeatmapIndex].badgeColor}`}>
+                  {volatilityHeatmapData[selectedHeatmapIndex].label}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300 pt-1">
+                <span>
+                  PSA 10 Price: <strong className="text-amber-300">£{volatilityHeatmapData[selectedHeatmapIndex].priceGbp.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</strong>
+                </span>
+                <span>
+                  Price Delta: <strong className={volatilityHeatmapData[selectedHeatmapIndex].priceDeltaGbp >= 0 ? 'text-emerald-400' : 'text-rose-400'}>
+                    {volatilityHeatmapData[selectedHeatmapIndex].priceDeltaGbp >= 0 ? `+£${volatilityHeatmapData[selectedHeatmapIndex].priceDeltaGbp}` : `-£${Math.abs(volatilityHeatmapData[selectedHeatmapIndex].priceDeltaGbp)}`} ({volatilityHeatmapData[selectedHeatmapIndex].pctChange}%)
+                  </strong>
+                </span>
+                <span>
+                  Trading Volume: <strong className="text-indigo-300">{volatilityHeatmapData[selectedHeatmapIndex].salesVolume} units</strong>
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-3 text-xs">
+              <div className="text-right">
+                <span className="text-[10px] text-slate-400 block">Volatility Score</span>
+                <span className="font-bold text-amber-400 text-sm">
+                  {volatilityHeatmapData[selectedHeatmapIndex].volatilityScore} / 100
+                </span>
+              </div>
+              <button
+                onClick={() => setSelectedHeatmapIndex(null)}
+                className="px-2.5 py-1 text-[10px] bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white rounded-lg border border-slate-700 transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* Multi-Card Side-by-Side Correlation & Return Overlay Tool */}
       <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl space-y-5">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-4">
@@ -841,6 +1135,53 @@ export const MarketAnalytics: React.FC = () => {
           </div>
         </div>
 
+        {/* Persistent Legend Bar for Compared Cards */}
+        <div className="bg-slate-950/80 p-3.5 rounded-xl border border-slate-800 space-y-2">
+          <div className="flex items-center justify-between text-xs font-semibold text-slate-400 border-b border-slate-800/80 pb-2">
+            <span className="flex items-center space-x-1.5 text-slate-300">
+              <Award className="w-3.5 h-3.5 text-amber-400" />
+              <span>Persistent Comparison Legend ({selectedComparisonIds.length} Active Cards)</span>
+            </span>
+            <span className="text-[10px] text-slate-500">Live GBP (£) Trajectory</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1">
+            {selectedComparisonIds.map((cardId, idx) => {
+              const cardObj = analyticsList.find(c => c.cardId === cardId);
+              if (!cardObj) return null;
+              const color = COMPARISON_COLORS[idx % COMPARISON_COLORS.length];
+              
+              // calculate period return
+              const cardDataset = timeframe === '30D' ? cardObj.historicalPrices30d || cardObj.historicalPrices
+                                : timeframe === '90D' ? cardObj.historicalPrices90d || cardObj.historicalPrices
+                                : timeframe === '1Y'  ? cardObj.historicalPrices1y || cardObj.historicalPrices
+                                : cardObj.historicalPrices;
+              const startP = cardDataset[0]?.psa10Price || 1;
+              const endP = cardDataset[cardDataset.length - 1]?.psa10Price || startP;
+              const returnPct = Number((((endP - startP) / startP) * 100).toFixed(1));
+
+              return (
+                <div key={`legend-bar-${cardId}`} className="p-2.5 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-between">
+                  <div className="flex items-center space-x-2.5 min-w-0">
+                    <span className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: color }} />
+                    <div className="min-w-0">
+                      <span className="font-bold text-white text-xs truncate block">{cardObj.cardName}</span>
+                      <span className="text-[10px] text-slate-400 truncate block">{cardObj.setName}</span>
+                    </div>
+                  </div>
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <span className="font-bold text-amber-300 text-xs block">
+                      {formatGBP(cardObj.currentPsa10)}
+                    </span>
+                    <span className={`text-[10px] font-semibold ${returnPct >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                      {returnPct >= 0 ? `+${returnPct}%` : `${returnPct}%`} ({timeframe})
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
         {/* Dropdowns for up to 3 Cards Comparison */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-950 p-4 rounded-xl border border-slate-800">
           {[0, 1, 2].map((slotIndex) => {
@@ -851,7 +1192,7 @@ export const MarketAnalytics: React.FC = () => {
                 <div className="flex items-center justify-between text-xs font-semibold">
                   <span className="flex items-center space-x-1.5" style={{ color: slotColor }}>
                     <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: slotColor }} />
-                    <span>Card {slotIndex + 1}</span>
+                    <span>Card Slot {slotIndex + 1}</span>
                   </span>
                   {selectedComparisonIds.length > 1 && currentCardId && (
                     <button
@@ -923,19 +1264,7 @@ export const MarketAnalytics: React.FC = () => {
                 tick={{ fontSize: 11 }} 
                 tickFormatter={(val) => isNormalized ? `${val}%` : `£${val >= 1000 ? `${(val/1000).toFixed(0)}k` : val}`}
               />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#0f172a',
-                  borderColor: '#334155',
-                  borderRadius: '12px',
-                  color: '#fff',
-                  fontSize: '12px',
-                }}
-                formatter={(value: any, name: any) => [
-                  isNormalized ? `${value}% return` : `£${value?.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-                  name
-                ]}
-              />
+              <Tooltip content={<CustomMultiComparisonTooltip />} />
               <Legend wrapperStyle={{ fontSize: '12px', paddingTop: '8px' }} />
               {selectedComparisonIds.map((cardId, index) => {
                 const cardObj = analyticsList.find(c => c.cardId === cardId);
