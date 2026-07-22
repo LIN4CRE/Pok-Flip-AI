@@ -17,10 +17,12 @@ import {
   Grid,
   List,
   Clock,
-  Sparkles
+  Sparkles,
+  QrCode
 } from 'lucide-react';
 import { PortfolioItem, InventoryStatus, Marketplace, CardCondition } from '../types';
 import { MARKETPLACE_FEES } from '../data/mockPokemonData';
+import { PortfolioQrModal } from './PortfolioQrModal';
 
 interface PortfolioManagerProps {
   portfolioItems: PortfolioItem[];
@@ -42,6 +44,7 @@ export const PortfolioManager: React.FC<PortfolioManagerProps> = ({
 
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
   const [itemToSell, setItemToSell] = useState<PortfolioItem | null>(null);
+  const [selectedQrItem, setSelectedQrItem] = useState<PortfolioItem | null>(null);
 
   // Form states for adding item
   const [newCardName, setNewCardName] = useState<string>('');
@@ -410,6 +413,13 @@ export const PortfolioManager: React.FC<PortfolioManagerProps> = ({
                       </td>
 
                       <td className="py-3 px-4 text-right space-x-1">
+                        <button
+                          onClick={() => setSelectedQrItem(item)}
+                          className="p-1.5 rounded-lg text-amber-400 hover:text-amber-300 hover:bg-slate-800 transition-colors"
+                          title="Generate Printable QR Code Badge"
+                        >
+                          <QrCode className="w-3.5 h-3.5" />
+                        </button>
                         {item.status !== 'Sold' && (
                           <button
                             onClick={() => {
@@ -468,17 +478,26 @@ export const PortfolioManager: React.FC<PortfolioManagerProps> = ({
                 </div>
               </div>
 
-              {item.status !== 'Sold' && (
+              <div className="mt-3 pt-2 border-t border-slate-800 flex items-center justify-between gap-2">
                 <button
-                  onClick={() => {
-                    setItemToSell(item);
-                    setSoldPriceInput(item.currentMarketValue.toString());
-                  }}
-                  className="mt-3 w-full py-1.5 rounded-xl bg-emerald-500 text-slate-950 font-bold text-xs"
+                  onClick={() => setSelectedQrItem(item)}
+                  className="flex-1 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-400 font-semibold text-xs flex items-center justify-center space-x-1"
                 >
-                  Mark Sold
+                  <QrCode className="w-3.5 h-3.5" />
+                  <span>QR Tag</span>
                 </button>
-              )}
+                {item.status !== 'Sold' && (
+                  <button
+                    onClick={() => {
+                      setItemToSell(item);
+                      setSoldPriceInput(item.currentMarketValue.toString());
+                    }}
+                    className="flex-1 py-1.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs"
+                  >
+                    Mark Sold
+                  </button>
+                )}
+              </div>
             </div>
           ))}
         </div>
@@ -647,6 +666,14 @@ export const PortfolioManager: React.FC<PortfolioManagerProps> = ({
             </form>
           </div>
         </div>
+      )}
+
+      {/* Printable QR Code & Audit Tag Modal */}
+      {selectedQrItem && (
+        <PortfolioQrModal
+          item={selectedQrItem}
+          onClose={() => setSelectedQrItem(null)}
+        />
       )}
     </div>
   );
