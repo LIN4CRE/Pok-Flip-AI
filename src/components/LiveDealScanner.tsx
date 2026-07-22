@@ -257,6 +257,10 @@ export const LiveDealScanner: React.FC<LiveDealScannerProps> = ({
                     <img
                       src={deal.card.imageUrl}
                       alt={deal.card.name}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.pokemontcg.io/swsh7/215_hires.png';
+                      }}
                       className="w-20 h-24 object-cover rounded-xl border border-slate-700 shadow-md flex-shrink-0 bg-slate-950"
                     />
                     <div className="flex-1 min-w-0">

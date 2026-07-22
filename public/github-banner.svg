@@ -1,0 +1,194 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 400" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradients -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#030712"/>
+      <stop offset="40%" stop-color="#0f172a"/>
+      <stop offset="80%" stop-color="#1e1b4b"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+
+    <!-- Glowing Accent Gradients -->
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/>
+      <stop offset="50%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#d97706"/>
+    </linearGradient>
+
+    <linearGradient id="emeraldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/>
+      <stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+
+    <linearGradient id="cyberText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="40%" stop-color="#fbbf24"/>
+      <stop offset="80%" stop-color="#34d399"/>
+      <stop offset="100%" stop-color="#38bdf8"/>
+    </linearGradient>
+
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.95"/>
+    </linearGradient>
+
+    <!-- Glow Filters -->
+    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <filter id="intenseGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="15" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Canvas Background -->
+  <rect width="1200" height="400" fill="url(#bgGrad)" />
+
+  <!-- Cyber Grid Lines -->
+  <g stroke="#1e293b" stroke-width="1" opacity="0.4">
+    <path d="M0,50 L1200,50 M0,100 L1200,100 M0,150 L1200,150 M0,200 L1200,200 M0,250 L1200,250 M0,300 L1200,300 M0,350 L1200,350" />
+    <path d="M100,0 L100,400 M200,0 L200,400 M300,0 L300,400 M400,0 L400,400 M500,0 L500,400 M600,0 L600,400 M700,0 L700,400 M800,0 L800,400 M900,0 L900,400 M1000,0 L1000,400 M1100,0 L1100,400" />
+  </g>
+
+  <!-- Glowing Abstract Tech Orbs -->
+  <circle cx="200" cy="80" r="140" fill="#f59e0b" opacity="0.08" filter="url(#intenseGlow)" />
+  <circle cx="1000" cy="300" r="180" fill="#10b981" opacity="0.08" filter="url(#intenseGlow)" />
+  <circle cx="600" cy="200" r="120" fill="#6366f1" opacity="0.06" filter="url(#intenseGlow)" />
+
+  <!-- Background Stock Chart Candlesticks -->
+  <g opacity="0.25">
+    <path d="M80,320 L80,240 M80,290 L80,260" stroke="#10b981" stroke-width="2"/>
+    <rect x="74" y="260" width="12" height="30" fill="#10b981" rx="2"/>
+
+    <path d="M120,300 L120,210" stroke="#10b981" stroke-width="2"/>
+    <rect x="114" y="220" width="12" height="60" fill="#10b981" rx="2"/>
+
+    <path d="M160,250 L160,180" stroke="#f59e0b" stroke-width="2"/>
+    <rect x="154" y="190" width="12" height="40" fill="#f59e0b" rx="2"/>
+
+    <path d="M200,220 L200,120" stroke="#10b981" stroke-width="2"/>
+    <rect x="194" y="130" width="12" height="70" fill="#10b981" rx="2"/>
+
+    <!-- Dynamic Financial Trend Line -->
+    <path d="M50,310 Q150,280 250,210 T450,190 T650,140 T850,110 T1150,60" fill="none" stroke="url(#goldGrad)" stroke-width="3" filter="url(#neonGlow)"/>
+    <path d="M50,310 Q150,280 250,210 T450,190 T650,140 T850,110 T1150,60 L1150,400 L50,400 Z" fill="url(#goldGrad)" opacity="0.05"/>
+  </g>
+
+  <!-- Left Side: Glowing Holographic Card Visual Art -->
+  <g transform="translate(80, 50)">
+    <!-- Card Frame Shadow -->
+    <rect x="0" y="0" width="200" height="290" rx="16" fill="url(#cardBg)" stroke="#334155" stroke-width="2" filter="url(#neonGlow)"/>
+    
+    <!-- Outer Card Holographic Border -->
+    <rect x="6" y="6" width="188" height="278" rx="12" fill="none" stroke="url(#cyberText)" stroke-width="2" opacity="0.8"/>
+    
+    <!-- Card Header Banner -->
+    <rect x="16" y="16" width="168" height="24" rx="6" fill="#0f172a" />
+    <text x="24" y="32" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="10" fill="#fbbf24">UMBREON VMAX</text>
+    <text x="145" y="32" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="9" fill="#34d399">320 HP</text>
+
+    <!-- Card Artwork Box -->
+    <rect x="16" y="46" width="168" height="150" rx="8" fill="#020617" />
+    <circle cx="100" cy="120" r="45" fill="#f59e0b" opacity="0.2" filter="url(#intenseGlow)"/>
+    
+    <!-- Styled Pokéball Emblem in Artwork -->
+    <g transform="translate(100, 120)">
+      <!-- Outer Ring -->
+      <circle cx="0" cy="0" r="36" fill="none" stroke="#fbbf24" stroke-width="4" filter="url(#neonGlow)"/>
+      <path d="M -36,0 A 36,36 0 0,1 36,0 Z" fill="#ef4444" opacity="0.8"/>
+      <path d="M -36,0 A 36,36 0 0,0 36,0 Z" fill="#f8fafc" opacity="0.9"/>
+      <line x1="-36" y1="0" x2="36" y2="0" stroke="#0f172a" stroke-width="6"/>
+      <circle cx="0" cy="0" r="10" fill="#0f172a"/>
+      <circle cx="0" cy="0" r="6" fill="#fbbf24" filter="url(#neonGlow)"/>
+    </g>
+
+    <!-- Sparkles -->
+    <path d="M35,65 L38,72 L45,75 L38,78 L35,85 L32,78 L25,75 L32,72 Z" fill="#38bdf8"/>
+    <path d="M160,165 L162,170 L167,172 L162,174 L160,179 L158,174 L153,172 L158,170 Z" fill="#fbbf24"/>
+
+    <!-- PSA 10 Gem Slab Badge -->
+    <rect x="16" y="206" width="168" height="34" rx="6" fill="#020617" stroke="#f59e0b" stroke-width="1.5"/>
+    <text x="24" y="222" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="9" fill="#94a3b8">PSA GEM MINT</text>
+    <text x="24" y="233" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="11" fill="#ffffff">GRADE 10</text>
+    <text x="125" y="227" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="12" fill="#34d399">£1,150</text>
+
+    <!-- Market Arbitrage Tag -->
+    <rect x="16" y="248" width="168" height="22" rx="6" fill="#064e3b" />
+    <text x="100" y="263" font-family="'Segoe UI', Roboto, sans-serif" font-weight="800" font-size="10" fill="#34d399" text-anchor="middle">⚡ +26.9% Instant ROI Arbitrage</text>
+  </g>
+
+  <!-- Right Side: Main Header Typography & Features -->
+  <g transform="translate(330, 80)">
+    <!-- Subheader Tag -->
+    <rect x="0" y="0" width="310" height="26" rx="13" fill="#1e1b4b" stroke="#6366f1" stroke-width="1" />
+    <text x="15" y="17" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="11" fill="#818cf8" letter-spacing="1">
+      🤖 NEXT-GEN POKÉMON CARD ARBITRAGE
+    </text>
+
+    <!-- Main Title -->
+    <text x="0" y="75" font-family="'Segoe UI', Roboto, sans-serif" font-weight="900" font-size="52" fill="url(#cyberText)" letter-spacing="-1" filter="url(#neonGlow)">
+      PokéFlip AI
+    </text>
+
+    <!-- Description -->
+    <text x="0" y="110" font-family="'Segoe UI', Roboto, sans-serif" font-size="16" fill="#94a3b8" width="700">
+      High-Frequency Trading &amp; Predictive Valuation Engine for Pokémon Cards
+    </text>
+    <text x="0" y="132" font-family="'Segoe UI', Roboto, sans-serif" font-size="14" fill="#64748b">
+      Sub-second multi-marketplace scanner, AI OCR condition grader, and automated APK build pipeline.
+    </text>
+
+    <!-- Key Feature Badges Grid -->
+    <g transform="translate(0, 160)">
+      <!-- Badge 1 -->
+      <rect x="0" y="0" width="180" height="36" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="1.5"/>
+      <circle cx="20" cy="18" r="8" fill="#10b981"/>
+      <text x="36" y="22" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="11" fill="#f8fafc">Live Feed Monitor</text>
+
+      <!-- Badge 2 -->
+      <rect x="195" y="0" width="180" height="36" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="1.5"/>
+      <circle cx="215" cy="18" r="8" fill="#f59e0b"/>
+      <text x="231" y="22" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="11" fill="#f8fafc">Gemini AI Valuation</text>
+
+      <!-- Badge 3 -->
+      <rect x="390" y="0" width="180" height="36" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="1.5"/>
+      <circle cx="410" cy="18" r="8" fill="#6366f1"/>
+      <text x="426" y="22" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="11" fill="#f8fafc">Predictive Trends</text>
+
+      <!-- Badge 4 -->
+      <rect x="585" y="0" width="180" height="36" rx="10" fill="#0f172a" stroke="#1e293b" stroke-width="1.5"/>
+      <circle cx="605" cy="18" r="8" fill="#38bdf8"/>
+      <text x="621" y="22" font-family="'Segoe UI', Roboto, sans-serif" font-weight="700" font-size="11" fill="#f8fafc">Android APK Ready</text>
+    </g>
+
+    <!-- Tech Stack Pill Badges -->
+    <g transform="translate(0, 215)">
+      <rect x="0" y="0" width="90" height="22" rx="6" fill="#18181b" stroke="#27272a"/>
+      <text x="45" y="15" font-family="sans-serif" font-weight="600" font-size="10" fill="#a1a1aa" text-anchor="middle">React 19</text>
+
+      <rect x="100" y="0" width="80" height="22" rx="6" fill="#18181b" stroke="#27272a"/>
+      <text x="140" y="15" font-family="sans-serif" font-weight="600" font-size="10" fill="#a1a1aa" text-anchor="middle">Vite 6</text>
+
+      <rect x="190" y="0" width="110" height="22" rx="6" fill="#18181b" stroke="#27272a"/>
+      <text x="245" y="15" font-family="sans-serif" font-weight="600" font-size="10" fill="#a1a1aa" text-anchor="middle">Tailwind v4</text>
+
+      <rect x="310" y="0" width="120" height="22" rx="6" fill="#18181b" stroke="#27272a"/>
+      <text x="370" y="15" font-family="sans-serif" font-weight="600" font-size="10" fill="#a1a1aa" text-anchor="middle">TypeScript 5.8</text>
+
+      <rect x="440" y="0" width="130" height="22" rx="6" fill="#18181b" stroke="#27272a"/>
+      <text x="505" y="15" font-family="sans-serif" font-weight="600" font-size="10" fill="#a1a1aa" text-anchor="middle">Capacitor Android</text>
+
+      <rect x="580" y="0" width="140" height="22" rx="6" fill="#052e16" stroke="#15803d"/>
+      <text x="650" y="15" font-family="sans-serif" font-weight="700" font-size="10" fill="#4ade80" text-anchor="middle">CI/CD APK Auto Build</text>
+    </g>
+  </g>
+</svg>

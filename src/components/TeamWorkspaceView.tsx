@@ -106,7 +106,15 @@ export const TeamWorkspaceView: React.FC<TeamWorkspaceViewProps> = ({
               }`}
             >
               <div className="flex items-center space-x-3">
-                <img src={member.avatarUrl} alt={member.name} className="w-12 h-12 rounded-full border border-slate-700 object-cover" />
+                <img
+                  src={member.avatarUrl}
+                  alt={member.name}
+                  referrerPolicy="no-referrer"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80';
+                  }}
+                  className="w-12 h-12 rounded-full border border-slate-700 object-cover"
+                />
                 <div>
                   <div className="font-bold text-white text-sm">{member.name}</div>
                   <div className="text-xs text-amber-400 font-medium">{member.role}</div>

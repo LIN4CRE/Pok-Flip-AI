@@ -28,21 +28,21 @@ const SAMPLE_PRESETS = [
     setName: 'Evolving Skies',
     setNumber: '215/203',
     grade: 'PSA 10 Candidate',
-    imgUrl: 'https://images.unsplash.com/photo-1613771404784-3a5686aa2be3?auto=format&fit=crop&w=600&q=80',
+    imgUrl: 'https://images.pokemontcg.io/swsh7/215_hires.png',
   },
   {
     name: '1st Edition Charizard Holo #4',
     setName: 'Base Set 1st Ed',
     setNumber: '4/102',
     grade: 'PSA 8 NM-MT',
-    imgUrl: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=600&q=80',
+    imgUrl: 'https://images.pokemontcg.io/base1/4_hires.png',
   },
   {
     name: 'Gengar VMAX Alt Art #271',
     setName: 'Fusion Strike',
     setNumber: '271/264',
     grade: 'Raw Pack Fresh',
-    imgUrl: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=600&q=80',
+    imgUrl: 'https://images.pokemontcg.io/swsh8/271_hires.png',
   },
 ];
 
@@ -197,7 +197,15 @@ export const AiValuationScanner: React.FC<AiValuationScannerProps> = ({
                     onClick={() => handleSelectPreset(preset)}
                     className="p-2 rounded-xl bg-slate-950 border border-slate-800 hover:border-amber-500/50 text-left transition-all group"
                   >
-                    <img src={preset.imgUrl} alt={preset.name} className="w-full h-14 object-cover rounded-md mb-1.5 opacity-80 group-hover:opacity-100" />
+                    <img
+                      src={preset.imgUrl}
+                      alt={preset.name}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.pokemontcg.io/swsh7/215_hires.png';
+                      }}
+                      className="w-full h-14 object-cover rounded-md mb-1.5 opacity-80 group-hover:opacity-100"
+                    />
                     <div className="text-[10px] font-bold text-slate-200 truncate">{preset.name}</div>
                     <div className="text-[9px] text-amber-400">{preset.grade}</div>
                   </button>

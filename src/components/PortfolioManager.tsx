@@ -346,6 +346,10 @@ export const PortfolioManager: React.FC<PortfolioManagerProps> = ({
                           <img
                             src={item.card.imageUrl}
                             alt={item.card.name}
+                            referrerPolicy="no-referrer"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = 'https://images.pokemontcg.io/swsh7/215_hires.png';
+                            }}
                             className="w-10 h-12 object-cover rounded border border-slate-700 bg-slate-950"
                           />
                           <div>

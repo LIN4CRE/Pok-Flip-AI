@@ -1,0 +1,8 @@
+{
+  "appId": "ai.pokeflip.app",
+  "appName": "PokéFlip AI",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
